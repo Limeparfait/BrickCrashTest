@@ -7,22 +7,36 @@
 		<link rel="shortcut icon" href="TemplateData/favicon.ico" />
 		<link rel="stylesheet" href="TemplateData/style.css" />
 		<script type="text/javascript">
+			var messageQueue = [];
+			var gameInstance;
+
 			function receiveMessage(event) {
 				if (event.data.type === "DeviceType") {
 					var deviceType = event.data.value;
-					if (typeof gameInstance !== "undefined") {
+					if (gameInstance) {
 						gameInstance.SendMessage(
 							"GameManager",
 							"SetDeviceType",
 							deviceType
 						);
 					} else {
-						console.error("gameInstance is not defined");
+						messageQueue.push(deviceType);
 					}
 				}
 			}
 
 			window.addEventListener("message", receiveMessage, false);
+
+			function processMessageQueue() {
+				while (messageQueue.length > 0) {
+					var deviceType = messageQueue.shift();
+					gameInstance.SendMessage(
+						"GameManager",
+						"SetDeviceType",
+						deviceType
+					);
+				}
+			}
 		</script>
 	</head>
 	<body>
@@ -108,14 +122,13 @@
 					.then((unityInstance) => {
 						loadingBar.style.display = "none";
 						gameInstance = unityInstance;
+						processMessageQueue();
 					})
 					.catch((message) => {
 						alert(message);
 					});
 			};
 			document.body.appendChild(script);
-
-			var gameInstance;
 		</script>
 	</body>
 </html>
