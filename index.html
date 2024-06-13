@@ -30,6 +30,33 @@
 				transform-origin: center; /* 크기 조정 기준을 좌상단으로 설정 */
 			}
 		</style>
+		<script type="text/javascript">
+			function getDeviceType() {
+				var userAgent =
+					navigator.userAgent || navigator.vendor || window.opera;
+
+				// 모바일 환경 확인
+				if (/android/i.test(userAgent)) {
+					return "Android";
+				}
+				if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+					return "iOS";
+				}
+				// PC 환경
+				return "PC";
+			}
+
+			function sendDeviceTypeToUnity() {
+				var deviceType = getDeviceType();
+				var iframe = document.querySelector(".game-frame");
+				iframe.contentWindow.postMessage(
+					{ type: "DeviceType", value: deviceType },
+					"*"
+				);
+			}
+
+			window.addEventListener("load", sendDeviceTypeToUnity);
+		</script>
 	</head>
 	<body>
 		<div class="game-container">
